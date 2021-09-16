@@ -1,0 +1,11 @@
+site_name: cyrsoxs-visualizer
+site_description: Morphology visualizer for Cy-RSoXS simulation engine
+site_author: Peter Dudenas
+
+theme: readthedocs
+
+
+repo_url: https://github.com/pdudenas/cyrsoxs-visualizer
+
+pages:
+- Home: index.md
