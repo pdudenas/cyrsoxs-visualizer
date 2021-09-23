@@ -29,7 +29,7 @@ def test_reader(tmp_path):
 
     # make sure it's the same as it started
     np.testing.assert_allclose(original_data_unaligned, layer_data_tuple[0])
-    np.testing.assert_allclose(original_data_aligned,layer_data_tuple[1])
+    np.testing.assert_allclose(original_data_aligned,layer_data_list[1][0])
 
 
 def test_get_reader_pass():
