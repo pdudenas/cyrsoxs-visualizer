@@ -1,6 +1,6 @@
 # cyrsoxs-visualizer
 
-[![License](https://img.shields.io/pypi/l/cyrsoxs-visualizer.svg?color=green)](https://github.com/pdudenas/cyrsoxs-visualizer/raw/master/LICENSE)
+[![License](https://img.shields.io/pypi/l/cyrsoxs-visualizer.svg?color=green)](https://github.com/pdudenas/cyrsoxs-visualizer/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/cyrsoxs-visualizer.svg?color=green)](https://pypi.org/project/cyrsoxs-visualizer)
 [![Python Version](https://img.shields.io/pypi/pyversions/cyrsoxs-visualizer.svg?color=green)](https://python.org)
 [![tests](https://github.com/pdudenas/cyrsoxs-visualizer/workflows/tests/badge.svg)](https://github.com/pdudenas/cyrsoxs-visualizer/actions)
