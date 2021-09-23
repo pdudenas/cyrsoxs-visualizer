@@ -12,7 +12,6 @@ https://napari.org/docs/dev/plugins/for_plugin_developers.html
 import numpy as np
 import h5py
 from napari_plugin_engine import napari_hook_implementation
-from skimage.transform import pyramid_gaussian
 
 
 @napari_hook_implementation
