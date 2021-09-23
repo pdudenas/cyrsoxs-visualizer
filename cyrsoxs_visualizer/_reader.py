@@ -10,7 +10,9 @@ Replace code below accordingly.  For complete documentation see:
 https://napari.org/docs/dev/plugins/for_plugin_developers.html
 """
 import numpy as np
+import h5py
 from napari_plugin_engine import napari_hook_implementation
+from skimage.transform import pyramid_gaussian
 
 
 @napari_hook_implementation
@@ -20,13 +22,12 @@ def napari_get_reader(path):
     Parameters
     ----------
     path : str or list of str
-        Path to file, or list of paths.
+        CyRSoXS morphology hdf5 file
 
     Returns
     -------
-    function or None
-        If the path is a recognized format, return a function that accepts the
-        same path or list of paths, and returns a list of layer data tuples.
+    Callable or None
+        CyRSoXS hdf5 reader if the path file extension is correct
     """
     if isinstance(path, list):
         # reader plugins may be handed single path, or a list of paths.
@@ -35,15 +36,15 @@ def napari_get_reader(path):
         path = path[0]
 
     # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
+    if not path.endswith(".hd5"):
         return None
 
     # otherwise we return the *function* that can read ``path``.
-    return reader_function
+    return read_hdf5
 
 
-def reader_function(path):
-    """Take a path or list of paths and return a list of LayerData tuples.
+def read_hdf5(path: str):
+    """Returns a list of LayerData tuples from the morphology hdf5
 
     Readers are expected to return data as a list of tuples, where each tuple
     is (data, [add_kwargs, [layer_type]]), "add_kwargs" and "layer_type" are
@@ -64,15 +65,12 @@ def reader_function(path):
         Both "meta", and "layer_type" are optional. napari will default to
         layer_type=="image" if not provided
     """
-    # handle both a string and a list of strings
-    paths = [path] if isinstance(path, str) else path
-    # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
-
-    # optional kwargs for the corresponding viewer.add_* method
-    add_kwargs = {}
-
-    layer_type = "image"  # optional, default is "image"
-    return [(data, add_kwargs, layer_type)]
+    with h5py.File(path, 'r') as h5:
+        layer_data_list = []
+        num_mat = h5['igor_parameters/igormaterialnum'][()]
+        for i in range(num_mat):
+            phi = h5[f'vector_morphology/Mat_{i+1}_unaligned'][()]
+            s = h5[f'vector_morphology/Mat_{i+1}_alignment'][()]
+            layer_data_list.append((phi,{'name':f'Mat_{i+1}_unaligned'},"image"))
+            layer_data_list.append((s,{'name':f'Mat_{i+1}_alignment'},"vectors"))
+    return layer_data_list
