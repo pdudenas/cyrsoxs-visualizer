@@ -113,13 +113,13 @@ class LineProfiler(QWidget):
         if event.type == 'visible':
             self.profile_lines()
     
-    def _on_load(self, event):
-        if event.type =='set_data':
-            self.profile_lines()
-            for layer in self.viewer.layers:
-                if isinstance(layer, napari.layers.Shapes):
-                    # not working at the moment
-                    layer.move_to_front() 
+    # def _on_load(self, event):
+    #     if event.type =='set_data':
+    #         self.profile_lines()
+    #         for layer in self.viewer.layers:
+    #             if isinstance(layer, napari.layers.Shapes):
+    #                 # not working at the moment
+    #                 layer.move_to_front() 
     
     # # For figuring out what events are happening
     # def print_event(self, event):
