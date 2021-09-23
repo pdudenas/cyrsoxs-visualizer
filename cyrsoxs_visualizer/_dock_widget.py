@@ -13,7 +13,7 @@ see: https://napari.org/docs/dev/plugins/hook_specifications.html
 Replace code below according to your needs.
 """
 from napari_plugin_engine import napari_hook_implementation
-# from qtpy.QtWidgets import QWidget, QHBoxLayout, QPushButton
+from qtpy.QtWidgets import QWidget, QGridLayout
 
 from skimage import measure
 import numpy as np
@@ -25,7 +25,7 @@ from matplotlib.figure import Figure
 import napari
 
 
-class LineProfiler():
+class LineProfiler(QWidget):
     # your QWidget.__init__ can optionally request the napari viewer instance
     # in one of two ways:
     # 1. use a parameter called `napari_viewer`, as done here
@@ -37,7 +37,10 @@ class LineProfiler():
         self.viewer.dims.axis_labels = ('y','x')
         self.canvas = FigureCanvas(Figure(figsize=(2,4)))
         self.ax = self.canvas.figure.subplots()
-
+        self.layout = QGridLayout()
+        self.layout.addWidget(self.canvas)
+        self.setLayout(self.layout)
+        # self.setCentralWidget(s)
         self.shapes_layer = self.viewer.add_shapes(
             np.array([[0,0],[128,128]]),
             shape_type='line',
@@ -53,8 +56,8 @@ class LineProfiler():
         self.profile_lines()
 
         # add plot below imagge
-        self.viewer.window.add_dock_widget(self.canvas, area='bottom')
-
+        # self.viewer.window.add_dock_widget(self.canvas, area='bottom')
+        # print(dir(self))
         # connect mouse drag callback
         self.shapes_layer.mouse_drag_callbacks.append(self.profile_lines_drag)
 
@@ -128,4 +131,4 @@ class LineProfiler():
 @napari_hook_implementation
 def napari_experimental_provide_dock_widget():
     # you can return either a single widget, or a sequence of widgets
-    return [LineProfiler]
+    return [(LineProfiler, {'area':'bottom','name':'Line Profiler'})]
