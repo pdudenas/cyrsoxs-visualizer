@@ -1,5 +1,6 @@
 import numpy as np
 from cyrsoxs_visualizer import napari_get_reader
+import h5py
 
 
 # tmp_path is a pytest fixture
@@ -7,9 +8,14 @@ def test_reader(tmp_path):
     """An example of how you might test your plugin."""
 
     # write some fake data using your supported file format
-    my_test_file = str(tmp_path / "myfile.npy")
-    original_data = np.random.rand(20, 20)
-    np.save(my_test_file, original_data)
+    my_test_file = str(tmp_path / "myfile.hd5")
+    original_data_unaligned = np.random.rand(20, 20)
+    original_data_aligned = np.random.rand(20,20,3)
+    with h5py.File(my_test_file,'w') as f:
+        f.create_dataset('igor_parameters/igormaterialnum',data=2.0)
+        f.create_dataset('vector_morphology/Mat_1_unaligned',data=original_data_unaligned)
+        f.create_dataset('vector_morphology/Mat_1_alignment',data=original_data_aligned)
+
 
     # try to read it back in
     reader = napari_get_reader(my_test_file)

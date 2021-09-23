@@ -62,7 +62,7 @@ class LineProfiler(QWidget):
         self.viewer.layers.events.connect(self._update_visibility)
 
         # update when an image is loaded
-        self.viewer.layers.events.connect(self._on_load)
+        # self.viewer.layers.events.connect(self._on_load)
 
         # # print out event
         # self.viewer.layers.events.connect(self.print_event)
