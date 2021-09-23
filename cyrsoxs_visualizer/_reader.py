@@ -66,7 +66,7 @@ def read_hdf5(path: str):
     """
     with h5py.File(path, 'r') as h5:
         layer_data_list = []
-        num_mat = h5['igor_parameters/igormaterialnum'][()]
+        num_mat = int(h5['igor_parameters/igormaterialnum'][()])
         for i in range(num_mat):
             phi = h5[f'vector_morphology/Mat_{i+1}_unaligned'][()]
             s = h5[f'vector_morphology/Mat_{i+1}_alignment'][()]

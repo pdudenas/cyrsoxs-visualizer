@@ -13,7 +13,7 @@ see: https://napari.org/docs/dev/plugins/hook_specifications.html
 Replace code below according to your needs.
 """
 from napari_plugin_engine import napari_hook_implementation
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QPushButton
+# from qtpy.QtWidgets import QWidget, QHBoxLayout, QPushButton
 
 from skimage import measure
 import numpy as np
@@ -25,7 +25,7 @@ from matplotlib.figure import Figure
 import napari
 
 
-class LineProfiler(QWidget):
+class LineProfiler():
     # your QWidget.__init__ can optionally request the napari viewer instance
     # in one of two ways:
     # 1. use a parameter called `napari_viewer`, as done here

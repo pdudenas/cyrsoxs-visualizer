@@ -12,7 +12,7 @@ def test_reader(tmp_path):
     original_data_unaligned = np.random.rand(20, 20)
     original_data_aligned = np.random.rand(20,20,3)
     with h5py.File(my_test_file,'w') as f:
-        f.create_dataset('igor_parameters/igormaterialnum',data=2.0)
+        f.create_dataset('igor_parameters/igormaterialnum',data=2)
         f.create_dataset('vector_morphology/Mat_1_unaligned',data=original_data_unaligned)
         f.create_dataset('vector_morphology/Mat_1_alignment',data=original_data_aligned)
 
