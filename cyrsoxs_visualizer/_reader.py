@@ -12,6 +12,8 @@ https://napari.org/docs/dev/plugins/for_plugin_developers.html
 import numpy as np
 import h5py
 from napari_plugin_engine import napari_hook_implementation
+from skimage.transform import pyramid_gaussian
+import os
 
 
 @napari_hook_implementation
@@ -67,9 +69,22 @@ def read_hdf5(path: str):
     with h5py.File(path, 'r') as h5:
         layer_data_list = []
         num_mat = int(h5['igor_parameters/igormaterialnum'][()])
-        for i in range(num_mat):
+        for i in range(num_mat-1): # don't include vacuum
+            # unaligned material
             phi = h5[f'vector_morphology/Mat_{i+1}_unaligned'][()]
+
+            # alignment vectors
             s = h5[f'vector_morphology/Mat_{i+1}_alignment'][()]
+
+            # reshape from (Z,Y,X,D) array to (N,2,D) array (list) of vectors
+            smag = np.sqrt(np.sum(s**2,axis=-1))
+            idx = smag > 0
+            vector_pos = np.column_stack(np.where(idx))
+            vectors = np.zeros((len(vector_pos),2,phi.ndim))
+            vectors[:,0,:] = vector_pos
+            vectors[:,1,:] = s[idx]
+            
+            # append data to return list
             layer_data_list.append((phi,{'name':f'Mat_{i+1}_unaligned'},"image"))
-            layer_data_list.append((s,{'name':f'Mat_{i+1}_alignment'},"vectors"))
+            layer_data_list.append((vectors,{'name':f'Mat_{i+1}_alignment','visible':False},"vectors"))
     return layer_data_list

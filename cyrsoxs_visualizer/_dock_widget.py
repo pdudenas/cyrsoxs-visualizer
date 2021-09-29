@@ -59,13 +59,16 @@ class LineProfiler(QWidget):
         # self.viewer.window.add_dock_widget(self.canvas, area='bottom')
         # print(dir(self))
         # connect mouse drag callback
-        self.shapes_layer.mouse_drag_callbacks.append(self.profile_lines_drag)
+        self.shapes_layer.mouse_drag_callbacks.append(self._profile_lines_drag)
 
         # update when a layer is made in/visible
         self.viewer.layers.events.connect(self._update_visibility)
 
+        # update when a layer is removed
+        self.viewer.layers.events.removed.connect(self._remove_extra_lines)
+
         # update when an image is loaded
-        # self.viewer.layers.events.connect(self._on_load)
+        self.viewer.layers.events.connect(self._on_load)
 
         # # print out event
         # self.viewer.layers.events.connect(self.print_event)
@@ -78,21 +81,29 @@ class LineProfiler(QWidget):
         return line        
     
     def get_line_data(self, image, start, end):
-        return measure.profile_line(image, start, end, mode='reflect')
+        if image.ndim == 2:
+            return measure.profile_line(image, start, end, mode='reflect')
+        else:
+            slice_nr = self.viewer.dims.current_step[0]
+            return measure.profile_line(image[slice_nr], start, end, mode='reflect')
     
+    def get_image_layers(self):
+        return [layer for layer in self.viewer.layers if isinstance(layer, napari.layers.Image)]
+
     def profile_lines(self):
         line = self._get_line()
-
-        for j, selected_layer in enumerate(self.viewer.layers):
-            if isinstance(selected_layer,napari.layers.Image) and selected_layer.visible != 0:
+        image_layers = self.get_image_layers()
+        for j, selected_layer in enumerate(image_layers):
+            if selected_layer.visible != 0:
                 y = self.get_line_data(selected_layer.data,*line)
                 x = np.arange(len(y))
                 try:
                     self.lines[j][0].set_data(x,y)
+                    self.lines[j][0].set_label(selected_layer.name)
                 except IndexError:
                     self.lines.append(self.ax.plot(self.get_line_data(selected_layer.data,*line),
                                                 label=selected_layer.name))
-            elif isinstance(selected_layer,napari.layers.Image) and selected_layer.visible == 0:
+            elif selected_layer.visible == 0:
                 x = []
                 y = []
                 self.lines[j][0].set_data(x,y)
@@ -103,22 +114,28 @@ class LineProfiler(QWidget):
         self.canvas.draw()
     
     
-    
-    def profile_lines_drag(self, layer, event):
+    def _remove_extra_lines(self, event):
+        if len(self.lines) > len(self.get_image_layers()):
+            self.lines.pop(-1)
+            self.ax.lines.pop(-1)
+        # self.ax.clear()
+        self.profile_lines()
+
+    def _profile_lines_drag(self, layer, event):
         self.profile_lines()
         yield
         while event.type =='mouse_move':
             self.profile_lines()
             yield
     
-    def _update_visibility(self,event):
+    def _update_visibility(self, event):
         # print('entered visibility function')
         if event.type == 'visible':
             self.profile_lines()
     
-    # def _on_load(self, event):
-    #     if event.type =='set_data':
-    #         self.profile_lines()
+    def _on_load(self, event):
+        if event.type =='set_data':
+            self.profile_lines()
     #         for layer in self.viewer.layers:
     #             if isinstance(layer, napari.layers.Shapes):
     #                 # not working at the moment
