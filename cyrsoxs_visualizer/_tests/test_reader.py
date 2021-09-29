@@ -14,6 +14,7 @@ def test_reader(tmp_path):
     with h5py.File(my_test_file,'w') as f:
         f.create_dataset('igor_parameters/igormaterialnum',data=1)
         f.create_dataset('vector_morphology/Mat_1_unaligned',data=original_data_unaligned)
+        f.create_dataset('vector_morphology/Mat_1_alignment',data=original_data_aligned)
 
 
     # try to read it back in
@@ -28,7 +29,7 @@ def test_reader(tmp_path):
 
     # make sure it's the same as it started
     np.testing.assert_allclose(original_data_unaligned, layer_data_tuple[0])
-
+    np.testing.assert_allclose(original_data_aligned,layer_data_list[1][0])
 
 
 def test_get_reader_pass():
