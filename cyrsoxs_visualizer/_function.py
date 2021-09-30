@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 from enum import Enum
 import numpy as np
 from napari_plugin_engine import napari_hook_implementation
+from magicgui import magicgui
+
 
 if TYPE_CHECKING:
     import napari
