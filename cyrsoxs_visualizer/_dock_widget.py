@@ -8,7 +8,7 @@ https://github.com/psobolewskiPhD/napari_scripts/blob/main/napari_line_profile_w
 
 ClippingPlanes QWidget inspired by and adapted from 
 
-https://github.com/napari/examples/clipping_planes_interactive.py
+https://github.com/napari/napari/blob/b39647d94e587f0255b0d4cc3087855e160a8929/examples/clipping_planes_interactive.py
 
 It implements the ``napari_experimental_provide_dock_widget`` hook specification.
 see: https://napari.org/docs/dev/plugins/hook_specifications.html
@@ -35,7 +35,7 @@ class LineProfiler(QWidget):
     # 1. use a parameter called `napari_viewer`, as done here
     # 2. use a type annotation of 'napari.viewer.Viewer' for any parameter
     def __init__(self, napari_viewer):
-        super().__init__()
+        super().__init__(napari_viewer.window.qt_viewer)
         self.viewer = napari_viewer
         self.viewer.axes.visible = True
         self.viewer.dims.axis_labels = ('y','x')
@@ -70,13 +70,16 @@ class LineProfiler(QWidget):
         self.viewer.layers.events.connect(self._on_load)
 
         # # print out event
-        # self.viewer.layers.events.connect(self.print_event)
+        # napari.utils.events.connect(self.print_event)
 
     def _get_line(self):
         line = None
         for layer in self.viewer.layers:
             if isinstance(layer, napari.layers.Shapes):
-                line = layer.data[-1]
+                try:
+                    line = layer.data[-1]
+                except IndexError:
+                    pass
         return line        
     
     def get_line_data(self, image, start, end):
@@ -91,6 +94,8 @@ class LineProfiler(QWidget):
 
     def profile_lines(self):
         line = self._get_line()
+        if line is None:
+            return
         image_layers = self.get_image_layers()
         for j, selected_layer in enumerate(image_layers):
             if selected_layer.visible != 0:
@@ -138,7 +143,7 @@ class LineProfiler(QWidget):
     
     # # For figuring out what events are happening
     # def print_event(self, event):
-    #     print(event.type)
+    #     print(event, event.type)
 
 
 class ClippingPlanes(QWidget):
