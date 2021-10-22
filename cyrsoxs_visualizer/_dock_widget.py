@@ -54,9 +54,6 @@ class LineProfiler(QWidget):
         )
         self.shapes_layer.mode = 'select'
 
-        self.lines = []
-        self.profile_lines()
-
         # connect mouse drag callback
         self.shapes_layer.mouse_drag_callbacks.append(self._profile_lines_drag)
 
@@ -72,6 +69,9 @@ class LineProfiler(QWidget):
         # # print out event
         # napari.utils.events.connect(self.print_event)
 
+        self.lines = []
+        self.profile_lines()
+
     def _get_line(self):
         line = None
         for layer in self.viewer.layers:
@@ -86,8 +86,16 @@ class LineProfiler(QWidget):
         if image.ndim == 2:
             return measure.profile_line(image, start, end, mode='reflect')
         else:
-            slice_nr = self.viewer.dims.current_step[0]
-            return measure.profile_line(image[slice_nr], start, end, mode='reflect')
+            displayed = list(self.viewer.dims.displayed)
+            remaining_dim = [x for x in [0,1,2] if x not in displayed]
+            slice_nr = self.viewer.dims.current_step[remaining_dim[0]]
+            if remaining_dim[0] == 0:
+                line_data = measure.profile_line(image[slice_nr,:,:], start, end, mode='reflect')
+            elif remaining_dim[0] == 1:
+                line_data = measure.profile_line(image[:,slice_nr,:], start, end, mode='reflect')
+            elif remaining_dim[0] == 2:
+                line_data = measure.profile_line(image[:,:,slice_nr], start, end, mode='reflect')
+            return line_data
     
     def get_image_layers(self):
         return [layer for layer in self.viewer.layers if isinstance(layer, napari.layers.Image)]
@@ -157,12 +165,12 @@ class ClippingPlanes(QWidget):
 
         self.plane_parameters = {
             'position': (32, 32, 32),
-            'normal': (0, 0, 1),
+            'normal': (1, 0, 0),
             'enabled': True
         }
 
         self.layout = QVBoxLayout()
-        self.choices = {'XY':(0,0,1),'XZ':(0,1,0),'YZ':(1,0,0),'XYZ':(1,1,1)}
+        self.choices = {'XY':(1,0,0),'XZ':(0,1,0),'YZ':(0,0,1),'XYZ':(1,1,1)}
         self.angles = {'XY':(45,45,90),'XZ':(45,90,45),'YZ':(90,45,45),'XYZ':(45,45,45)}
         for i, choice in enumerate(self.choices):
             btn = QRadioButton(choice)

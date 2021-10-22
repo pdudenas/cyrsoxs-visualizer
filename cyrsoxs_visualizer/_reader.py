@@ -37,11 +37,11 @@ def napari_get_reader(path):
         path = path[0]
 
     # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".hd5"):
-        return None
+    if path.endswith(".hd5") or path.endswith(".hdf5"):
+        return read_hdf5
 
     # otherwise we return the *function* that can read ``path``.
-    return read_hdf5
+    return none
 
 
 def read_hdf5(path: str):
@@ -72,7 +72,7 @@ def read_hdf5(path: str):
         for i in range(num_mat-1): # don't include vacuum
             # unaligned material
             phi = h5[f'vector_morphology/Mat_{i+1}_unaligned'][()]
-
+            layer_data_list.append((phi,{'name':f'Mat_{i+1}_unaligned'},"image"))
             # alignment vectors
             s = h5[f'vector_morphology/Mat_{i+1}_alignment'][()]
 
@@ -80,11 +80,11 @@ def read_hdf5(path: str):
             smag = np.sqrt(np.sum(s**2,axis=-1))
             idx = smag > 0
             vector_pos = np.column_stack(np.where(idx))
-            vectors = np.zeros((len(vector_pos),2,phi.ndim))
-            vectors[:,0,:] = vector_pos
-            vectors[:,1,:] = s[idx]
-            
-            # append data to return list
-            layer_data_list.append((phi,{'name':f'Mat_{i+1}_unaligned'},"image"))
-            layer_data_list.append((vectors,{'name':f'Mat_{i+1}_alignment','visible':False},"vectors"))
+            if len(vector_pos) != 0:
+                vectors = np.zeros((len(vector_pos),2,phi.ndim))
+                vectors[:,0,:] = vector_pos
+                vectors[:,1,:] = s[idx]
+
+                layer_data_list.append((vectors,{'name':f'Mat_{i+1}_alignment','visible':False,'edge_width':0.1},"vectors"))
+    
     return layer_data_list
