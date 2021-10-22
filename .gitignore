@@ -79,4 +79,4 @@ target/
 */_version.py
 
 # local data files
-.hdf5
+*.hdf5
