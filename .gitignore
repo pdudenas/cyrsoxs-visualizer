@@ -77,3 +77,6 @@ target/
 
 # written by setuptools_scm
 */_version.py
+
+# local data files
+.hdf5
